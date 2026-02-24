@@ -1,0 +1,19 @@
+# Environment variables (NEVER commit!)
+.env
+setup/.env
+
+# Python
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Data files (too large)
+*.parquet
+*.json
+
+# Models
+models/*.pkl
+
+# Virtual environment
+venv/
+env/
