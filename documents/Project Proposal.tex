@@ -1,0 +1,79 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+% CVPR template
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+%%%%%%%%% PAPER ID
+\def\cvprPaperID{****}
+\def\confName{COMP 6630 Final Project Proposal}
+\def\confYear{2026}
+
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Predicting UFC Fight Outcomes Using Machine Learning}
+
+\author{
+Clay Ramey \quad Nicholas Winfrey \quad Muhammad Khattak \\
+{\tt\small car0126@auburn.edu, ntw0015@auburn.edu, muk0003@auburn.edu} \\
+\\
+COMP 5630/6630 -- Machine Learning \\
+Auburn University
+}
+
+\maketitle
+\thispagestyle{empty}
+
+\section{Project Idea}
+This project aims to predict UFC fight outcomes using machine learning. Given two fighters and their historical statistics, we will predict the probability that each fighter wins. This is a binary classification problem where the target variable is the fight result (fighter A wins vs.\ fighter B wins), with P(B wins) = 1 $-$ P(A wins).
+
+We will compare multiple ML approaches covered in this course---logistic regression, decision trees, and multi-layer perceptrons (MLPs)---to determine which best captures the factors that influence fight outcomes.
+
+\section{Dataset Description}
+Our dataset contains approximately 5,000 UFC fights with detailed fighter information including:
+
+\begin{itemize}
+\item \textbf{Fight outcomes}: Winner and method of victory
+\item \textbf{Physical attributes}: Height, weight, reach, stance
+\item \textbf{Performance history}: Win/loss records, strike statistics, takedown accuracy, submission attempts
+\item \textbf{Fight details}: Date, weight class, event information
+\end{itemize}
+
+From this raw data, we will engineer features such as win rates, recent form (last 3--5 fights), striking/grappling differentials between fighters, and experience gaps. Preprocessing will include handling missing values, normalizing continuous features, and encoding categorical variables. We will use a temporal train/test split to avoid data leakage.
+
+\section{Proposed ML Task}
+\textbf{Input}: Fighter A and Fighter B statistics (individual and relative features).
+
+\textbf{Output}: Predicted probability of each fighter winning.
+
+\textbf{Models}: Logistic regression (baseline), decision trees/random forests, and MLP. Each model will be tuned using cross-validation.
+
+\textbf{Evaluation}: Accuracy, precision, recall, F1-score, confusion matrices, and AIC comparison across models. Feature importance analysis will identify which attributes are most predictive of fight outcomes.
+
+\section{Software}
+Python, AWS S3, scikit-learn, matplotlib, pandas, polars, PyTorch, Git.
+
+\section{Work Breakdown}
+
+\textbf{Clay Ramey (Data)}: Data cleaning, preprocessing, and feature engineering---building fighter statistics from raw fight data, handling missing values, and normalization.
+
+\textbf{Muhammad Khattak (Modeling)}: Implementing and training models (logistic regression, decision trees, MLP), hyperparameter tuning and model selection.
+
+\textbf{Nicholas Winfrey (Evaluation \& Integration)}: Model evaluation (accuracy, precision, recall, confusion matrices, AIC comparison), visualizations, and working between the data and modeling sides to refine features and tune parameters based on evaluation results.
+
+\section{Tentative Schedule}
+Regular meetings: Mondays at 8:00 PM and Tuesdays at 6:15 PM.
+
+\begin{itemize}
+\item \textbf{Weeks 1--2}: Data exploration, cleaning, and feature engineering
+\item \textbf{Weeks 3--4}: Baseline model implementation and initial evaluation
+\item \textbf{Weeks 5--6}: Model refinement and hyperparameter tuning
+\item \textbf{Weeks 7--8}: Final evaluation, analysis, and report writing
+\end{itemize}
+
+\end{document}
