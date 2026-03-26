@@ -8,8 +8,9 @@ def main():
 
     # 2. Generate features
     features = FightFeatures(fights_df, prior_fights_df, prior_rounds_df)
-    features.root_fights_meta_df()
-    print(features.final_df)
+    features.extract_fights_features()
+    features.extract_prior_fights_features()
+    features.final_df.write_csv("features.csv")
 
 if __name__ == "__main__":
     main()
