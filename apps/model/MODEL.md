@@ -26,6 +26,44 @@ The **11.8pp train/test gap** indicates real overfitting. Not catastrophic — e
 
 ---
 
+## Potential Features (Brainstormed)
+
+### Style Fingerprinting / Matchup
+| Feature | Idea |
+|---|---|
+| **Wrestler vs Striker score** | `(td_avg * ctrl_time) vs (slpm * str_acc)` → continuous grappler-to-striker index per fighter, diff for matchup |
+| **Reach utilization** | `distance_landed / sig_str_landed` — does the fighter actually fight at range? Interact with reach_diff |
+| **Clinch-to-takedown pipeline** | `td_landed / clinch_attempts` — clinch-to-takedown conversion rate |
+| **Ground control quality** | `ground_str_landed / ctrl_time_s` — separates wrestlers-who-hold from wrestlers-who-punish |
+
+### Wear and Tear / Damage
+| Feature | Idea |
+|---|---|
+| **Career damage index** | Cumulative `opp_sig_str_landed` across all prior fights, recency-weighted — chin erosion proxy |
+| **KO chin trend** | `opp_kd` rate in last 3 vs career — is the chin holding up recently? |
+| **Head shot concentration** | `opp_head_landed / opp_sig_str_landed` — absorbing clean head shots vs leg kicks; different long-term profiles |
+
+### Strength of Schedule
+| Feature | Idea |
+|---|---|
+| **Avg opponent ELO** | Mean ELO of all prior opponents at fight time — same win rate, very different if they beat cans vs contenders |
+| **Performance vs elite** | slpm / str_acc specifically when facing opponents with ELO > 1600 — do they level up or get exposed? |
+
+### Grappling Depth
+| Feature | Idea |
+|---|---|
+| **Sub threat from bottom** | `sub_att` filtered to rounds where `opp_ctrl_time_s > 0` — threatens from guard vs just survives |
+| **Takedown-to-sub conversion** | `sub_att / td_landed` — once on the mat, how dangerous? |
+
+### Mental / Momentum
+| Feature | Idea |
+|---|---|
+| **Finish rate trend** | `finish_rate_last_3 / finish_rate_career` — going up = peaking, down = getting into wars |
+| **Big fight performance** | slpm / str_acc specifically in 5-round fights — rises to occasion or gasses? |
+| **Return from layoff** | Win rate in fights after layoff > 1yr, per fighter — fighter-specific rust signal |
+
+---
+
 ## Priority Roadmap
 
 ### 1. Feature Engineering — Highest ROI, do first
@@ -35,7 +73,7 @@ At 72% accuracy with 125 features, the model is near the ceiling of what raw his
 | Feature | Why it matters |
 |---|---|
 | **Betting odds** | Single strongest predictor in sports ML. Encodes market consensus on everything we've engineered plus intangibles. Opening vs. closing line movement is a separate signal. |
-| **ELO / Glicko rating** | Dynamic win-quality score. `win_rate_diff` (#1 feature) is blind to opponent quality — beating a ranked #2 fighter should count more than beating a journeyman. |
+| **ELO rating** ✓ | Implemented with variable K schedule tuned via bucket-MAE calibration. Schedule: 0–4 fights K=66, 5–14 K=68, 15–19 K=63, 20+ K=54. Cal loss 0.0049 vs 0.0366 for fixed K=32 (7.5x improvement). Stat blending (alpha>0) consistently hurt — UFC upsets are frequent enough that binary result carries more signal. Top 10: Makhachev, Jones, Khabib, Holloway, Dvalishvili, Usman, Volkanovski, Topuria, Chimaev, DC. |
 | **Win/loss streak** | Current momentum. Equal records can hide very different recent trajectories. |
 | **Short-turnaround flag** | `years_since_last_fight` misses the non-linear risk at the short end — a 45-day turnaround is very different from 6 months. |
 | **Style matchup** | Grappler vs. striker, etc. Derivable from existing stats (high td_avg + low slpm ≈ wrestler). The model can learn this indirectly but explicit interaction features help tree models. |

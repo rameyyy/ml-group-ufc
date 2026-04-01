@@ -63,6 +63,16 @@
 |---|---|---|
 | `win_rate_diff` | `f1_win/(f1_win+f1_loss) − f2_win/(f2_win+f2_loss)` | from UFC snapshot; point-in-time, not leaky |
 
+### ELO Rating
+
+> Computed globally across all fights in chronological order. Pre-fight rating is recorded (no leakage). K=32, initial=1500.
+
+| Feature | Formula | Notes |
+|---|---|---|
+| `f1_elo` | ELO rating of f1 before this fight | absolute quality signal |
+| `f2_elo` | ELO rating of f2 before this fight | absolute quality signal |
+| `elo_diff` | `f1_elo − f2_elo` | relative strength; main predictive signal |
+
 ---
 
 ## Features — `prior_fights_df`
@@ -124,6 +134,16 @@
 | `{p}_last_fight_end_time_s` | `end_time_s` of most recent fight | recency-weighted finish time |
 | `{p}_last_3_avg_end_time_s` | `mean(end_time_s)` of last 3 fights | short-term pace |
 | `{p}_avg_end_time_s` | `mean(end_time_s)` career | career finish tendency; high = decision fighter |
+| `{p}_total_time_fought_s` | `sum(end_time_s)` career | total seconds spent in the cage; complements fight_count with volume-of-action info |
+
+### Momentum **(f1 & f2)**
+
+> Kept per-fighter — both fighters' streaks are visible to the model simultaneously.
+
+| Feature | Formula | Notes |
+|---|---|---|
+| `{p}_win_streak` | consecutive wins from most recent fight | current hot streak; 0 if most recent is a loss |
+| `{p}_loss_streak` | consecutive losses from most recent fight | current cold streak; 0 if most recent is a win |
 
 ### Striking & Grappling Stats **(diff)**
 

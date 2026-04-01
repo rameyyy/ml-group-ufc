@@ -1,6 +1,7 @@
 import polars as pl
 from fights_exprs import fights_select_exprs
-from prior_fights_exprs import build_duration_features, build_format_experience, build_years_since_last_fight, build_activity, build_method_counts, build_weight_class_fight_count, build_striking_stats, build_advanced_stats, build_round_features, split_by_role
+from prior_fights_exprs import build_duration_features, build_format_experience, build_years_since_last_fight, build_activity, build_method_counts, build_weight_class_fight_count, build_striking_stats, build_advanced_stats, build_round_features, build_streak, split_by_role
+from elo import build_elo_ratings
 
 
 class FightFeatures:
@@ -30,6 +31,8 @@ class FightFeatures:
         striking = build_striking_stats(self.prior_fights)
         advanced = build_advanced_stats(self.prior_fights)
         rounds = build_round_features(self.prior_rounds, self.prior_fights)
+        streak = build_streak(self.prior_fights)
+        elo = build_elo_ratings(self.fights, self.prior_fights)
 
         self.final_df = (
             self.final_df
@@ -51,6 +54,9 @@ class FightFeatures:
             .join(split_by_role(advanced, "f2", "f2"), left_on="meta_root_fight_id", right_on="root_fight_id", how="left")
             .join(split_by_role(rounds, "f1", "f1"), left_on="meta_root_fight_id", right_on="root_fight_id", how="left")
             .join(split_by_role(rounds, "f2", "f2"), left_on="meta_root_fight_id", right_on="root_fight_id", how="left")
+            .join(split_by_role(streak, "f1", "f1"), left_on="meta_root_fight_id", right_on="root_fight_id", how="left")
+            .join(split_by_role(streak, "f2", "f2"), left_on="meta_root_fight_id", right_on="root_fight_id", how="left")
+            .join(elo, left_on="meta_root_fight_id", right_on="root_fight_id", how="left")
         )
         self._compute_striking_diffs()
         self._compute_advanced_diffs()

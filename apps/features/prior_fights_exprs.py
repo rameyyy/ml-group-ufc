@@ -16,6 +16,7 @@ def build_duration_features(prior_fights: pl.DataFrame) -> pl.DataFrame:
             pl.col("end_time_s").sort_by("fight_date", descending=True).first().alias("last_fight_end_time_s"),
             pl.col("end_time_s").sort_by("fight_date", descending=True).head(3).mean().alias("last_3_avg_end_time_s"),
             pl.col("end_time_s").mean().alias("avg_end_time_s"),
+            pl.col("end_time_s").sum().alias("total_time_fought_s"),
         ])
     )
 
@@ -504,6 +505,39 @@ def build_round_features(prior_rounds: pl.DataFrame, prior_fights: pl.DataFrame)
             ).alias("last_3_post_kd_response"),
         ])
         .select(output_cols)
+    )
+
+
+def build_streak(prior_fights: pl.DataFrame) -> pl.DataFrame:
+    """Current consecutive win/loss streak for each fighter.
+
+    Sorts fights most-recent-first, then uses cumulative sums to identify
+    the unbroken run at the head of the sequence:
+      - win_streak  = wins before the first loss
+      - loss_streak = losses before the first win
+    """
+    is_win = (pl.col("result") == "win").cast(pl.Int32)
+    is_loss = (pl.col("result") == "loss").cast(pl.Int32)
+
+    pf = (
+        prior_fights
+        .sort(["root_fight_id", "fighter_role", "fight_date"], descending=[False, False, True])
+        .with_columns([
+            is_win.alias("is_win"),
+            is_loss.alias("is_loss"),
+        ])
+        .with_columns([
+            pl.col("is_loss").cum_sum().over(["root_fight_id", "fighter_role"]).alias("cumsum_loss"),
+            pl.col("is_win").cum_sum().over(["root_fight_id", "fighter_role"]).alias("cumsum_win"),
+        ])
+    )
+
+    return (
+        pf.group_by(["root_fight_id", "fighter_role"])
+        .agg([
+            pl.col("is_win").filter(pl.col("cumsum_loss") == 0).sum().cast(pl.Int16).alias("win_streak"),
+            pl.col("is_loss").filter(pl.col("cumsum_win") == 0).sum().cast(pl.Int16).alias("loss_streak"),
+        ])
     )
 
 
