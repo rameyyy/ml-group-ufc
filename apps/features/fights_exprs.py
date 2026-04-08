@@ -44,4 +44,14 @@ def fights_select_exprs() -> list:
             pl.col("f1_win").cast(pl.Float32) / (pl.col("f1_win") + pl.col("f1_loss")).cast(pl.Float32)
             - pl.col("f2_win").cast(pl.Float32) / (pl.col("f2_win") + pl.col("f2_loss")).cast(pl.Float32)
         ).alias("win_rate_diff"),
+        # Southpaw advantage: 1 if f1=southpaw & f2=orthodox, -1 if reversed, 0 otherwise
+        pl.when(
+            (pl.col("f1_stance") == "Southpaw") & (pl.col("f2_stance") == "Orthodox")
+        ).then(pl.lit(1))
+        .when(
+            (pl.col("f1_stance") == "Orthodox") & (pl.col("f2_stance") == "Southpaw")
+        ).then(pl.lit(-1))
+        .otherwise(pl.lit(0))
+        .cast(pl.Int8)
+        .alias("southpaw_advantage"),
     ]
