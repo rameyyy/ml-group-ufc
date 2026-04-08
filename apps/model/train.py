@@ -41,13 +41,73 @@ def time_split(X, y, dates, test_frac=0.2):
     return X[train_idx], X[test_idx], y[train_idx], y[test_idx]
 
 
+def mirror_augment(
+    X: np.ndarray,
+    y: np.ndarray,
+    feature_cols: list[str],
+    rng_seed: int = 42,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Double the training set by adding a f1/f2-swapped copy of every fight.
+
+    The UFC dataset assigns f1/f2 labels by a convention that shifted over
+    time — train has 56% f1 wins, test only 43%.  Without correction the
+    model learns a spurious directional bias.
+
+    For each fight we create a mirror where:
+      - f1_* and f2_* columns are swapped
+      - *_diff columns are negated  (diff = f1-f2, so flipped diff = f2-f1 = -diff)
+      - symmetric context columns (weight_class_id, fight_format, etc.) are unchanged
+      - the label is flipped  (f1 win → f2 win)
+
+    After augmentation the training win rate is exactly 50% by construction.
+    """
+    col_idx = {col: i for i, col in enumerate(feature_cols)}
+
+    # Build swap pairs: f1_XXX <-> f2_XXX
+    swap_pairs: list[tuple[int, int]] = []
+    seen_f2: set[str] = set()
+    for col in feature_cols:
+        if col.startswith("f1_"):
+            partner = "f2_" + col[3:]
+            if partner in col_idx and partner not in seen_f2:
+                swap_pairs.append((col_idx[col], col_idx[partner]))
+                seen_f2.add(partner)
+
+    # Collect diff column indices (to negate)
+    diff_cols: list[int] = [
+        i for i, col in enumerate(feature_cols) if col.endswith("_diff")
+    ]
+
+    X_mirror = X.copy()
+
+    # Swap f1/f2 pairs
+    for i, j in swap_pairs:
+        X_mirror[:, i], X_mirror[:, j] = X[:, j].copy(), X[:, i].copy()
+
+    # Negate diffs
+    X_mirror[:, diff_cols] = -X[:, diff_cols]
+
+    y_mirror = 1 - y
+
+    # Concatenate and shuffle so original/mirror pairs aren't adjacent
+    X_aug = np.concatenate([X, X_mirror], axis=0)
+    y_aug = np.concatenate([y, y_mirror], axis=0)
+
+    rng = np.random.default_rng(rng_seed)
+    perm = rng.permutation(len(y_aug))
+    return X_aug[perm], y_aug[perm]
+
+
 def train():
     X, y, feature_cols, dates = load()
     X_train, X_test, y_train, y_test = time_split(X, y, dates)
 
     print(f"Features : {X.shape[1]}")
-    print(f"Train    : {len(y_train)} fights  ({y_train.mean():.3f} f1 win rate)")
+    print(f"Train    : {len(y_train)} fights  ({y_train.mean():.3f} f1 win rate)  [pre-augment]")
     print(f"Test     : {len(y_test)} fights  ({y_test.mean():.3f} f1 win rate)")
+
+    X_train, y_train = mirror_augment(X_train, y_train, feature_cols)
+    print(f"Train    : {len(y_train)} fights  ({y_train.mean():.3f} f1 win rate)  [post-augment]")
     print()
 
     model = xgb.XGBClassifier(
