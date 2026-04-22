@@ -1,2 +1,23 @@
-boto3>=1.34.0
-python-dotenv>=1.0.0
+# Core data science
+numpy>=1.24.0
+pandas>=2.0.0
+pyarrow>=14.0.0
+
+# Machine learning
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+lightgbm>=4.0.0
+catboost>=1.2.0
+
+# Model interpretability
+shap>=0.43.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Exploratory feature pipeline (02_exploration notebooks)
+polars>=0.20.0
+
+# Notebook support
+jupyter>=1.0.0
+ipykernel>=6.0.0

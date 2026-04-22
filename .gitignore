@@ -1,19 +1,27 @@
-# Environment variables (NEVER commit!)
-.env
-setup/.env
-
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+.env.*
+*.env
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
 .DS_Store
-
-# Data files (too large)
-*.parquet
-*.json
-
-# Models
-models/*.pkl
-
-# Virtual environment
-venv/
-env/
+Thumbs.db
