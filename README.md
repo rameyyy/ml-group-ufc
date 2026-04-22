@@ -18,6 +18,17 @@ See the full report in `documents/Comp6630 UFC Final Project Report.pdf`.
 
 ---
 
+## Team & Collaboration
+
+| Member | Contributions |
+|---|---|
+| **Clay Ramey** | Model development and optimization — built and tuned the core classification pipeline, implemented GridSearchCV with TimeSeriesSplit, led hyperparameter search across all 10 models |
+| **Muhammad Khattak** | Model development and optimization — developed the feature engineering pipeline, constructed the bifurcated win/loss aggregate feature space, and validated the chronological train/test split |
+| **Nicholas Winfrey** | Feature importance analysis and documentation — analyzed top-30 feature importance across the four best models, contributed to the written report and code documentation |
+| **Erin Houston** | Data preprocessing and evaluation — assisted with data cleaning, missing value handling, evaluation metric selection, and contributed to the results analysis and report writing |
+
+---
+
 ## Repository Structure
 
 ```
